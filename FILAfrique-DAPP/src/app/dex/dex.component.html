@@ -1,0 +1,284 @@
+<div class="toolbar" role="banner">
+  <img
+    width="40"
+    alt="Angular Logo"
+    src="./../../assets/HomePageAssets/0xAfricaLogo.png"
+  />
+  <span>Welcome to 0xAfrica DEX</span>
+    <div class="spacer"></div>
+    <button class="button-margin" (click)="connectWallet()">
+      <label class="button-label" for="Connect Wallet">Connect Wallet</label>
+    </button>
+    <div style="padding: 10px;">
+      <label style="font-size: large;" *ngIf="walletConnected">Connected to: {{walletAddress}}</label>
+    </div>
+    
+</div>
+<div class="content" role="main">
+  <div class="card-container">
+    <p-card header="Local African Crypto Backed Digital Currency" [style]="{width:'800px', height: '600px'}" *ngIf="chainSelected">
+      <ng-template pTemplate="header">
+          <h2 style="text-align: center;">Let's SWAPPP!</h2>
+      </ng-template>
+      <div>
+        <p-inputNumber  [(ngModel)]="_fromAmount" 
+                        [showButtons]="true" 
+                        buttonLayout="horizontal" 
+                        spinnerMode="horizontal"
+                        decrementButtonClass="p-button-danger" 
+                        incrementButtonClass="p-button-success" 
+                        incrementButtonIcon="pi pi-plus" 
+                        decrementButtonIcon="pi pi-minus"
+                        mode="decimal"
+                        [minFractionDigits]="2" 
+                        [maxFractionDigits]="4"
+                        >
+        </p-inputNumber>
+        &nbsp;
+        <p-dropdown [options]="Tokens" [(ngModel)]="selectedFromToken" optionLabel="tokenName">
+          <ng-template let-token pTemplate="selectedItem">
+            <div class="token">
+                <label for="token"><img src="{{token.tokenFlag}}" alt="flag" style="height: 15px; width: 15px"/> {{token.tokenName}}</label>
+            </div>
+          </ng-template>
+          <ng-template let-token pTemplate="item">
+            <div class="token">
+                <label for="fromToken"><img src="{{token.tokenFlag}}" alt="flag" style="height: 15px; width: 15px"/> {{token.tokenName}}</label>
+            </div>
+          </ng-template>
+        </p-dropdown>
+      </div>
+      <div #spacer style="height: 50px;"></div>
+      <div>
+        <p-inputNumber  [(ngModel)]="_toAmount"
+                        [showButtons]="true" 
+                        buttonLayout="horizontal" 
+                        spinnerMode="horizontal"
+                        decrementButtonClass="p-button-danger" 
+                        incrementButtonClass="p-button-success" 
+                        incrementButtonIcon="pi pi-plus" 
+                        decrementButtonIcon="pi pi-minus"
+                        [disabled]="true">
+        </p-inputNumber>
+        &nbsp;
+        <p-dropdown [options]="Tokens" [(ngModel)]="selectedToToken" optionLabel="tokenName">
+          <ng-template let-token pTemplate="selectedItem">
+            <div class="token">
+                <label for="toToken"><img src="{{token.tokenFlag}}" alt="flag" style="height: 15px; width: 15px"/> {{token.tokenSymbol}}</label>
+            </div>
+          </ng-template>
+          <ng-template let-token pTemplate="item">
+            <div class="token">
+                <label for="token"><img src="{{token.tokenFlag}}" alt="flag" style="height: 15px; width: 15px"/> {{token.tokenSymbol}}</label>
+            </div>
+          </ng-template>
+        </p-dropdown>
+      </div>
+      <div #spacer style="height: 50px;"></div>
+      <button pButton type="button" icon="pi pi-calculator" iconPos="left" label="Calculate Swap" (click)="calculateSwap()" class="p-button-warning" *ngIf="!canSwap"></button>
+      <button pButton type="button" icon="pi pi-sort-alt" iconPos="left" label="Swappp" (click)="swapTokens()" class="p-button-primary" *ngIf="canSwap"></button>
+    </p-card>
+    <div class="card-container">
+      <p-card header="Please select your required chain" [style]="{width:'800px', height: '300px'}" *ngIf="!chainSelected">
+        <ng-template pTemplate="header">
+            <h2 style="text-align: center;"></h2>
+        </ng-template>
+        <p-selectButton [options]="CHAINS" [(ngModel)]="chain" optionLabel="name"></p-selectButton>
+        <div #spacer style="height: 50px;"></div>
+        <div #spacer style="height: 50px;"></div>
+        <button pButton type="button" icon="pi pi-sort-alt" iconPos="left" label="Proceed to DEX" (click)="continueToSwap()" class="p-button-primary"></button>
+      </p-card>
+  </div>
+</div>
+<p-confirmDialog header="Sign into TronLink" icon="pi pi-wallet" [transitionOptions]="'0ms'"></p-confirmDialog>
+<div style="text-align: center;">
+  <h2>0xAfrica Contracts</h2>
+  <label>Please add token contracts to your wallet to interact with the token</label>
+</div>
+<p-carousel [value]="CHAINS" [numVisible]="1">
+  <ng-template let-chain pTemplate="item">
+    <p-card header="">
+      <ng-template pTemplate="header">
+          <h2 style="text-align: center;">{{chain.name}}</h2>
+      </ng-template>
+      <img src="{{chain.logo}}" alt="logo" style="height: 50px; width: 50px;">
+      <div>
+        <label style="font-weight: 600;" for="">DEX: {{chain.contracts.dex}}</label>
+      </div>
+      <div>
+        <label style="font-weight: 600;" for="">Franc: {{chain.contracts.franc}}</label>
+      </div>
+      <div>
+        <label style="font-weight: 600;" for="">ZAR: {{chain.contracts.rand}}</label>
+      </div>
+      <div>
+        <label style="font-weight: 600;" for="">EGP: {{chain.contracts.pound}}</label>
+      </div>
+      <div>
+        <label style="font-weight: 600;" for="">NGN: {{chain.contracts.naira}}</label>
+      </div>
+    </p-card>
+  </ng-template>
+</p-carousel>
+
+<style>
+  :host {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    background-color: #1976d2;
+    color: white;
+    font-weight: 600;
+  }
+
+  .toolbar img {
+    margin: 0 16px;
+  }
+
+  .toolbar #launcher:hover {
+    opacity: 0.8;
+  }
+
+  .content {
+    display: flex;
+    margin: 82px auto 32px;
+    padding: 0 16px;
+    max-width: 960px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .card {
+    all: unset;
+    border-radius: 4px;
+    border: 1px solid #eee;
+    background-color: #fafafa;
+    height: 400px;
+    width: 400px;
+    margin: 0 8px 16px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+    line-height: 24px;
+  }
+
+  .card-container .card:not(:last-child) {
+    margin-right: 0;
+  }
+
+  .card.card-small {
+    height: 16px;
+    width: 168px;
+  }
+
+  .card-container .card:not(.highlight-card) {
+    cursor: pointer;
+  }
+
+  .card-container .card:not(.highlight-card):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 17px rgba(0, 0, 0, 0.35);
+  }
+
+  .card-container .card:not(.highlight-card):hover .material-icons path {
+    fill: rgb(105, 103, 103);
+  }
+
+  .card.highlight-card {
+    background-color: #1976d2;
+    color: white;
+    font-weight: 600;
+    border: none;
+    width: auto;
+    min-width: 30%;
+    position: relative;
+  }
+
+  .card.card.highlight-card span {
+    margin-left: 60px;
+  }
+
+  a,
+  a:visited,
+  a:hover {
+    color: #1976d2;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: #125699;
+  }
+
+  /* Responsive Styles */
+  @media screen and (max-width: 767px) {
+    .card-container > *:not(.circle-link) ,
+    .terminal {
+      width: 100%;
+    }
+
+    .card:not(.highlight-card) {
+      height: 16px;
+      margin: 8px 0;
+    }
+
+    .card.highlight-card span {
+      margin-left: 72px;
+    }
+  }
+
+  @media screen and (max-width: 575px) {
+    svg#rocket-smoke {
+      display: none;
+      visibility: hidden;
+    }
+  }
+
+  .button-label{
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .button-margin{
+    margin: 15px;
+    padding: 10px;
+  }
+
+  .input-box{
+    height: 15px;
+    border: #333 solid 2px;
+    border-radius: 3px;
+  }
+
+  .input-selection-spacer{
+    width: 10px;
+  }
+
+  p-card-shadow{
+    box-shadow: 5px 10px #888888;
+  }
+</style>
