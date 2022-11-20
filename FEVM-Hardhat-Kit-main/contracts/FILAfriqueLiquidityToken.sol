@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
-/// @title XRC20/ERC20/TRC20 Standard stablecoin
-contract ZExAfricaStablecoin{
+/// @title ERC20 Standard stablecoin
+contract FILAfriqueLiquidityToken{
 
     uint8 public tokenDecimals;
     uint256 private totalTokenSupply;
     string public tokenName;
     string public tokenSymbol;
-    string public peggedCurrency;
     address public deployerAddress;
 
     mapping (address => uint) private addressBalance;
@@ -15,7 +14,6 @@ contract ZExAfricaStablecoin{
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    event TokenCreated(address indexed _contractAddress, address indexed _deployerAddress, string _name, string _symbol, uint8 _decimals);
     event FunctionCannotBeCalled(address _contractAddress, address _functionCaller, string message);
 
     error RevertTransaction(string _error, string _solution);
@@ -43,14 +41,12 @@ contract ZExAfricaStablecoin{
         _;
     }
 
-    constructor(string memory _name, string memory _symbol, string memory _peggedCurrency){
+    constructor(string memory _name, string memory _symbol){
         deployerAddress = msg.sender;
         tokenName = _name;
         tokenSymbol = _symbol;
-        peggedCurrency = _peggedCurrency;
         tokenDecimals = 18;
         totalTokenSupply = 0;
-        emit TokenCreated(address(this), deployerAddress, tokenName, tokenSymbol, tokenDecimals);
     }
 
     function name() public view returns (string memory _name){

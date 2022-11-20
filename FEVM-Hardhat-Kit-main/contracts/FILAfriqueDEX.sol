@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
-import "./ZExAfricaStablecoin.sol"; 
-import "./ZExAfricaOracle.sol";
-import "./ZExAfricaLiquidityToken.sol";
+import "./FILAfriqueStablecoin.sol"; 
+import "./FILAfriqueOracle.sol";
+import "./FILAfriqueLiquidityToken.sol";
 
-interface IZExAfricaOracle {
+interface IFILAfriqueOracle {
 
     function getRate(string memory _tokenName) external view returns(uint256);
 
 }
 
 /// @title Main deployer and DEX contract
-contract ZExAfricaDEX {
+contract FILAfriqueDEX {
     
     uint256 public transactionFee;
     uint256 public minimumLiquidityContributionAmount;
@@ -22,11 +22,11 @@ contract ZExAfricaDEX {
 
     address public oracleAddress;
 
-    IZExAfricaOracle priceFeedOracle;
+    IFILAfriqueOracle priceFeedOracle;
 
-    ZExAfricaLiquidityToken liquidityTokenContract;
+    FILAfriqueLiquidityToken liquidityTokenContract;
 
-    mapping (string => ZExAfricaStablecoin) public tokenContractsDeployed;
+    mapping (string => FILAfriqueStablecoin) public tokenContractsDeployed;
 
     event NewStablecoinDeployed(string _tokenName, string _tokenSymbol, address _tokenAddress, string _peggedCurrency);
     event TransactionFeeUpdated(uint256 _feeAmount);
@@ -52,7 +52,7 @@ contract ZExAfricaDEX {
         _;
     }
 
-    modifier ContractHasSufficientLiquidity(ZExAfricaStablecoin _contract, uint256 _value){
+    modifier ContractHasSufficientLiquidity(FILAfriqueStablecoin _contract, uint256 _value){
         require(checkLiquidity(_contract, _value) == true, "Liquidity is low at the moment!");
         _;
     }
@@ -60,8 +60,8 @@ contract ZExAfricaDEX {
     constructor(address _oracleAddress){
         oracleAddress = _oracleAddress;
         manager = msg.sender;
-        priceFeedOracle = IZExAfricaOracle(oracleAddress);
-        liquidityTokenContract = new ZExAfricaLiquidityToken("0xAfrica Liquidity Token", "0xAL");
+        priceFeedOracle = IFILAfriqueOracle(oracleAddress);
+        liquidityTokenContract = new FILAfriqueLiquidityToken("0xAfrica Liquidity Token", "0xAL");
     }
 
     function getTransactionFee()public view returns(uint256 _fee){
@@ -91,12 +91,12 @@ contract ZExAfricaDEX {
     }
 
     function deployStablecoin(string memory _name, string memory _symbol, string memory _peggedCurrency) external OnlyManager("Only the manager or delgated authority can deploy a new stablecoin") returns(bool){
-        tokenContractsDeployed[_name] = new ZExAfricaStablecoin(_name, _symbol, _peggedCurrency);
+        tokenContractsDeployed[_name] = new FILAfriqueStablecoin(_name, _symbol, _peggedCurrency);
         emit NewStablecoinDeployed(_name, _symbol, address(tokenContractsDeployed[_name]), _peggedCurrency);
         return true;
     }
 
-    function onRamp(address _sender, uint256 _value, ZExAfricaStablecoin _contract) internal ContractHasSufficientLiquidity(_contract, _value) returns(bool success){
+    function onRamp(address _sender, uint256 _value, FILAfriqueStablecoin _contract) internal ContractHasSufficientLiquidity(_contract, _value) returns(bool success){
         //get the exchange rate. 
         uint256 _rate = priceFeedOracle.getRate(_contract.name());
         //calculate the amount to be minted based on the native token that was sent.
@@ -128,7 +128,7 @@ contract ZExAfricaDEX {
                                 _solution: "The swapToken(string _tokenName) method should be called in order to process the swap"});
     }
 
-    function checkLiquidity(ZExAfricaStablecoin _contract, uint _tentativeAmountToBeMinted) internal returns(bool){
+    function checkLiquidity(FILAfriqueStablecoin _contract, uint _tentativeAmountToBeMinted) internal returns(bool){
         uint256 nativeTokenBalanceInFactory = address(this).balance;
         uint256 stablecoinCurrentSupplyIfSwapIsSuccessful = _contract.totalSupply() + _tentativeAmountToBeMinted;
         uint256 _rate = priceFeedOracle.getRate(_contract.name());
